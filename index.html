@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Tienda Frontend</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f4f4f9; }
+        h1 { color: #333; text-align: center; }
+        ul { list-style: none; padding: 0; }
+        li { background: white; margin: 15px 0; padding: 18px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); line-height: 1.6; }
+        button { display: block; width: 100%; background: #007bff; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        .error-put { color: #dc3545; font-style: italic; }
+        .badge-id { background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-right: 5px; }
+        .badge-codigo { background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Inventario con IDs de Productos</h1>
+    <button onclick="cargarProductos()">Actualizar Lista</button>
+    <ul id="lista-productos"></ul>
+
+    <script>
+        function cargarProductos() {
+            fetch('http://localhost:3000/productos')
+                .then(respuesta => respuesta.json())
+                .then(productos => {
+                    const contenedor = document.getElementById('lista-productos');
+                    contenedor.innerHTML = ''; // Limpiar la lista vieja antes de cargar
+
+                    productos.forEach(prod => {
+                        const elemento = document.createElement('li');
+                        
+                        // Validaciones de seguridad para evitar errores si usas el método PUT
+                        const idHTML = prod.id !== undefined ? `<span class="badge-id">ID: ${prod.id}</span>` : '<span class="error-put">⚠️ (ID borrado por PUT)</span>';
+                        const codigoHTML = prod.codigo ? `<span class="badge-codigo">Código: ${prod.codigo}</span>` : '<span class="error-put">⚠️ (Código borrado por PUT)</span>';
+                        const productoHTML = prod.producto ? `<strong>${prod.producto}</strong>` : '<span class="error-put">⚠️ (Nombre borrado por PUT)</span>';
+                        const precioHTML = prod.precio !== undefined ? `Q${prod.precio}` : '<span class="error-put">Precio no definido</span>';
+                        const cantidadHTML = prod.cantidad !== undefined ? `${prod.cantidad} unidades` : '<span class="error-put">Cantidad no definida</span>';
+
+                        // Construcción visual de cada producto de la lista
+                        elemento.innerHTML = `
+                            <div>${idHTML} ${codigoHTML}</div>
+                            <div style="font-size: 18px; margin: 5px 0;">${productoHTML}</div>
+                            <div>Precio: <strong>${precioHTML}</strong> | Stock: <strong>${cantidadHTML}</strong></div>
+                        `;
+                        
+                        contenedor.appendChild(elemento);
+                    });
+                })
+                .catch(error => {
+                    alert("Error al conectar con tu API. ¿Olvidaste activar CORS o encender tu servidor .js?");
+                    console.error(error);
+                });
+        }
+
+        // Cargar los productos automáticamente al abrir la página en el navegador
+        cargarProductos();
+    </script>
+</body>
+</html>
